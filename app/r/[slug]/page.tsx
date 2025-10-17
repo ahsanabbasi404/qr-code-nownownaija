@@ -20,12 +20,16 @@ export default async function RedirectPage({
       return <div className="p-8 text-center">QR code not found</div>
     }
 
-    // Record the scan
-    await supabase.from("qr_scans").insert({
-      qr_code_id: qrCode.id,
-      user_agent: "user-agent",
-      ip_address: "0.0.0.0",
-    })
+    // Record the scan, but don't block redirection on failure
+    try {
+      await supabase.from("qr_scans").insert({
+        qr_code_id: qrCode.id,
+        user_agent: "user-agent",
+        ip_address: "0.0.0.0",
+      })
+    } catch (scanError) {
+      console.error("Failed to record scan:", scanError)
+    }
 
     // Redirect to target URL
     redirect(qrCode.target_url)
