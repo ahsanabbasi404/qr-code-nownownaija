@@ -9,7 +9,7 @@ interface DownloadButtonsProps {
   url: string
 }
 
-export default function DownloadButtons({ qrRef, url }: DownloadButtonsProps) {
+  export default function DownloadButtons({ qrRef, url }: DownloadButtonsProps) {
   const downloadQRCode = (format: "png" | "svg") => {
     const canvas = qrRef.current?.querySelector("canvas") as HTMLCanvasElement
     if (!canvas) return

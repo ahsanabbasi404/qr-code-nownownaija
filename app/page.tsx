@@ -69,18 +69,18 @@ function DashboardContent({ supabaseError }: { supabaseError: string | null }) {
       const { getSupabaseClient } = await import("@/lib/supabase-client")
       const supabase = getSupabaseClient()
 
-      const { data, error } = await supabase
-        .from("qr_codes")
-        .select(
-          `
-          id,
-          slug,
-          target_url,
-          created_at,
-          qr_scans(count)
-        `,
-        )
-        .order("created_at", { ascending: false })
+  const { data, error } = await supabase
+    .from("qr_codes")
+    .select(
+      `
+      id,
+      slug,
+      target_url,
+      created_at,
+      qr_scans(count)
+    `,
+    )
+    .order("created_at", { ascending: false })
 
       if (error) throw error
 
@@ -101,7 +101,7 @@ function DashboardContent({ supabaseError }: { supabaseError: string | null }) {
   }
 
   if (isLoading) {
-    return <div className="text-center text-muted-foreground">Loading your QR codes...</div>
+    return <div className="text-center text-muted-foreground">Loading your QR codes from database...</div>
   }
 
   if (qrCodes.length === 0) {
@@ -122,7 +122,9 @@ function DashboardContent({ supabaseError }: { supabaseError: string | null }) {
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-muted-foreground mb-1">Target URL:</p>
-                <p className="text-sm font-mono text-foreground break-all mb-3">{qr.target_url}</p>
+                <p className="text-sm font-mono text-foreground break-all mb-2">{qr.target_url}</p>
+                <p className="text-sm text-muted-foreground mb-1">QR Code URL (use this in your QR code):</p>
+                <p className="text-sm font-mono text-blue-600 break-all mb-3">{`${process.env.NEXT_PUBLIC_URL || 'https://qr.nownownaija.com'}/r/${qr.slug}`}</p>
                 <p className="text-xs text-muted-foreground">Created: {new Date(qr.created_at).toLocaleDateString()}</p>
               </div>
               <div className="text-right">

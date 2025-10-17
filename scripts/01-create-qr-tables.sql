@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS qr_codes (
 -- Create scans table
 CREATE TABLE IF NOT EXISTS qr_scans (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  qr_code_id UUID NOT NULL REFERENCES qr_codes(id) ON DELETE CASCADE,
+  qr_code_id UUID REFERENCES qr_codes(id) ON DELETE CASCADE,
   scanned_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   user_agent TEXT,
   ip_address TEXT
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS qr_scans (
 
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS idx_qr_codes_slug ON qr_codes(slug);
-CREATE INDEX IF NOT EXISTS idx_qr_scans_qr_code_id ON qr_scans(qr_code_id);
+CREATE INDEX IF NOT EXISTS idx_qr_scans_qr_code_id ON qr_scans(qr_code_id) WHERE qr_code_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_qr_scans_scanned_at ON qr_scans(scanned_at);
 
 -- Enable RLS

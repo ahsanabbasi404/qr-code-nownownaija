@@ -3,7 +3,7 @@
 import type { RefObject } from "react"
 import { QRCodeSVG } from "qrcode.react"
 interface QRPreviewProps {
-  qrRef: RefObject<HTMLDivElement>
+  qrRef: RefObject<HTMLDivElement | null>
   qrValue: string
 }
 
