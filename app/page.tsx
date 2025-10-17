@@ -1,10 +1,10 @@
 "use client"
 
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, RefObject } from "react"
 import QRGenerator from "@/components/qr-generator"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { QRCodeCanvas } from "qrcode.react"
+import { QRCodeSVG } from "qrcode.react"
 import DownloadButtons from "@/components/download-buttons"
 import { encodeUrlForRedirect } from "@/lib/utils"
 
@@ -79,6 +79,7 @@ function DashboardContent({ supabaseError }: { supabaseError: string | null }) {
       id,
       slug,
       target_url,
+      base_url,
       created_at,
       qr_scans(count)
     `,
@@ -133,16 +134,18 @@ function DashboardQRCodeCard({
     id: string
     slug: string
     target_url: string
+    base_url?: string
     created_at: string
     qr_scans?: { count: number }[]
   }
   redirectBase: string
 }) {
   const qrRef = React.useRef<HTMLDivElement>(null)
-  const redirectUrl = React.useMemo(
-    () => buildRedirectUrl(qr.target_url, qr.slug, redirectBase),
-    [qr.target_url, qr.slug, redirectBase],
-  )
+  const redirectUrl = React.useMemo(() => {
+    // Use the stored base_url from database, fallback to redirectBase
+    const baseUrl = qr.base_url || redirectBase
+    return buildRedirectUrl(qr.target_url, qr.slug, baseUrl)
+  }, [qr.target_url, qr.slug, qr.base_url, redirectBase])
   const scanCount = qr.qr_scans?.[0]?.count ?? 0
 
   return (
@@ -151,6 +154,8 @@ function DashboardQRCodeCard({
         <div className="flex-1 min-w-0">
           <p className="text-sm text-muted-foreground mb-1">Target URL:</p>
           <p className="text-sm font-mono text-foreground break-all mb-2">{qr.target_url}</p>
+          <p className="text-sm text-muted-foreground mb-1">Base URL:</p>
+          <p className="text-sm font-mono text-foreground break-all mb-2">{qr.base_url || 'Default (from environment)'}</p>
           <p className="text-sm text-muted-foreground mb-1">QR Code URL (use this in your QR code):</p>
           <a
             href={redirectUrl}
@@ -170,15 +175,17 @@ function DashboardQRCodeCard({
             className="p-4 bg-white rounded-lg border border-border shadow-sm"
             aria-label="QR code preview"
           >
-            <QRCodeCanvas
+            <QRCodeSVG
               value={redirectUrl}
-              size={512}
+              size={256}
               level="H"
               includeMargin={true}
-              style={{ width: 192, height: 192 }}
+              bgColor="#ffffff"
+              fgColor="#000000"
+              style={{ width: 192, height: 192, imageRendering: "pixelated" }}
             />
           </div>
-          <DownloadButtons qrRef={qrRef} url={redirectUrl} />
+          <DownloadButtons qrRef={qrRef as RefObject<HTMLDivElement>} url={redirectUrl} />
           <div className="text-center">
             <p className="text-3xl font-bold text-foreground leading-none">{scanCount}</p>
             <p className="text-xs text-muted-foreground">scans</p>

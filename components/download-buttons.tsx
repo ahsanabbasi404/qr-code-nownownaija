@@ -11,30 +11,47 @@ interface DownloadButtonsProps {
 
 export default function DownloadButtons({ qrRef, url }: DownloadButtonsProps) {
   const downloadQRCode = (format: "png" | "svg") => {
-    const canvas = qrRef.current?.querySelector("canvas") as HTMLCanvasElement | null
-    if (!canvas) {
-      console.warn("QR download requested but no canvas element was found.", { url })
+    const svg = qrRef.current?.querySelector("svg") as SVGSVGElement | null
+    if (!svg) {
+      console.warn("QR download requested but no SVG element was found.", { url })
       return
     }
 
-    // TODO: Future feature - Log download analytics
-    // trackQRDownload({ url, format, timestamp: new Date() })
+    const serializer = new XMLSerializer()
+    const svgString = serializer.serializeToString(svg)
+    const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" })
 
     if (format === "png") {
-      const link = document.createElement("a")
-      link.href = canvas.toDataURL("image/png")
-      link.download = `qr-code-${Date.now()}.png`
-      link.click()
+      const canvas = document.createElement("canvas")
+      const scale = 4
+      const size = parseInt(svg.getAttribute("width") ?? "256", 10)
+      const renderSize = Number.isFinite(size) ? size : 256
+      canvas.width = renderSize * scale
+      canvas.height = renderSize * scale
+      const ctx = canvas.getContext("2d")
+
+      if (!ctx) {
+        console.warn("Unable to obtain canvas context for QR download.")
+        return
+      }
+
+      const img = new Image()
+      img.onload = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+        const link = document.createElement("a")
+        link.href = canvas.toDataURL("image/png")
+        link.download = `qr-code-${Date.now()}.png`
+        link.click()
+      }
+      img.onerror = (err) => {
+        console.error("Failed to render QR SVG for PNG download.", err)
+      }
+      const svgBase64 = window.btoa(unescape(encodeURIComponent(svgString)))
+      img.src = `data:image/svg+xml;base64,${svgBase64}`
     } else if (format === "svg") {
-      // Convert canvas to SVG
       const link = document.createElement("a")
-      const svgData = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256">
-          <image href="${canvas.toDataURL("image/png")}" width="256" height="256"/>
-        </svg>
-      `
-      const blob = new Blob([svgData], { type: "image/svg+xml" })
-      const svgUrl = URL.createObjectURL(blob)
+      const svgUrl = URL.createObjectURL(svgBlob)
       link.href = svgUrl
       link.download = `qr-code-${Date.now()}.svg`
       link.click()

@@ -76,6 +76,7 @@ export default function QRGenerator() {
       const { error: dbError } = await supabase.from("qr_codes").insert({
         slug,
         target_url: url,
+        base_url: normalizedBase,
       })
 
       if (dbError) {
