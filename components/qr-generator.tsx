@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef, RefObject } from "react"
+import { useMemo, useState, useRef, RefObject } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,10 +13,11 @@ import { getSupabaseClient } from "@/lib/supabase-client"
 import { generateSlug, encodeUrlForRedirect } from "@/lib/utils"
 
 export default function QRGenerator() {
+  const defaultRedirectBase = useMemo(() => process.env.NEXT_PUBLIC_URL ?? "", [])
   const [url, setUrl] = useState("")
   const [qrValue, setQrValue] = useState("")
   const [outputUrl, setOutputUrl] = useState("")
-  const [redirectBase, setRedirectBase] = useState("")
+  const [redirectBase, setRedirectBase] = useState(defaultRedirectBase)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [baseError, setBaseError] = useState("")
@@ -53,21 +54,21 @@ export default function QRGenerator() {
       return
     }
 
+    const fallbackBase = defaultRedirectBase.trim()
+    const resolvedBase = providedBase || fallbackBase
+
+    if (!resolvedBase) {
+      setBaseError("No redirect base URL configured. Provide one above or set NEXT_PUBLIC_URL.")
+      return
+    }
+
+    const normalizedBase = resolvedBase.replace(/\/+$/, "")
+
     setIsLoading(true)
     try {
       const supabase = getSupabaseClient()
       const slug = generateSlug()
       const encodedUrl = encodeUrlForRedirect(url)
-
-      const fallbackBase = process.env.NEXT_PUBLIC_URL?.trim() ?? ""
-      const resolvedBase = providedBase || fallbackBase
-
-      if (!resolvedBase) {
-        setBaseError("No redirect base URL configured. Provide one above or set NEXT_PUBLIC_URL.")
-        return
-      }
-
-      const normalizedBase = resolvedBase.replace(/\/+$/, "")
       const redirectUrl = `${normalizedBase}/r/redirect?slug=${encodeURIComponent(slug)}&url=${encodedUrl}`
 
       // Store QR code in Supabase (for analytics)
@@ -120,7 +121,7 @@ export default function QRGenerator() {
           </label>
           <Input
             type="url"
-            placeholder={process.env.NEXT_PUBLIC_URL ?? "https://qr.nownownaija.com"}
+            placeholder={defaultRedirectBase || "https://qr.nownownaija.com"}
             value={redirectBase}
             onChange={(e) => setRedirectBase(e.target.value)}
             aria-label="Redirect base URL input"

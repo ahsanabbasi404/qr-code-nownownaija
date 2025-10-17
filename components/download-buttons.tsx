@@ -9,10 +9,13 @@ interface DownloadButtonsProps {
   url: string
 }
 
-  export default function DownloadButtons({ qrRef, url }: DownloadButtonsProps) {
+export default function DownloadButtons({ qrRef, url }: DownloadButtonsProps) {
   const downloadQRCode = (format: "png" | "svg") => {
-    const canvas = qrRef.current?.querySelector("canvas") as HTMLCanvasElement
-    if (!canvas) return
+    const canvas = qrRef.current?.querySelector("canvas") as HTMLCanvasElement | null
+    if (!canvas) {
+      console.warn("QR download requested but no canvas element was found.", { url })
+      return
+    }
 
     // TODO: Future feature - Log download analytics
     // trackQRDownload({ url, format, timestamp: new Date() })

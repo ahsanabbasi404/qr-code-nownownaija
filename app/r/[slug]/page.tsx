@@ -9,14 +9,16 @@ export default async function RedirectPage({
   params,
   searchParams,
 }: {
-  params: { slug: string }
-  searchParams: { [key: string]: string | string[] | undefined }
+  params: Promise<{ slug: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const supabase = await getSupabaseServer()
-  const slug = params.slug
-  const urlParam = searchParams.url
-  const querySlug = getFirstParam(searchParams.slug)
-  const requestHeaders = headers()
+  const resolvedParams = await params
+  const resolvedSearchParams = await searchParams
+  const slug = resolvedParams.slug
+  const urlParam = resolvedSearchParams.url
+  const querySlug = getFirstParam(resolvedSearchParams.slug)
+  const requestHeaders = await headers()
   const userAgent = requestHeaders.get("user-agent") ?? null
   const ipAddress = getClientIp(requestHeaders)
 
@@ -211,7 +213,7 @@ function getFirstParam(value: string | string[] | undefined): string | undefined
   return Array.isArray(value) ? value[0] : value
 }
 
-function getClientIp(headerStore: ReturnType<typeof headers>): string | null {
+function getClientIp(headerStore: Awaited<ReturnType<typeof headers>>): string | null {
   const forwardedFor = headerStore.get("x-forwarded-for")
   if (forwardedFor) {
     const [first] = forwardedFor.split(",")

@@ -1,10 +1,12 @@
 "use client"
 
-import React from "react"
-import { useState } from "react"
+import React, { useMemo, useState } from "react"
 import QRGenerator from "@/components/qr-generator"
 import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { QRCodeCanvas } from "qrcode.react"
+import DownloadButtons from "@/components/download-buttons"
+import { encodeUrlForRedirect } from "@/lib/utils"
 
 export default function Home() {
   const [view, setView] = useState<"generator" | "dashboard">("generator")
@@ -55,6 +57,7 @@ export default function Home() {
 function DashboardContent({ supabaseError }: { supabaseError: string | null }) {
   const [qrCodes, setQrCodes] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const redirectBase = useMemo(() => getRedirectBase(), [])
 
   React.useEffect(() => {
     if (!supabaseError) {
@@ -115,26 +118,85 @@ function DashboardContent({ supabaseError }: { supabaseError: string | null }) {
       <h2 className="text-2xl font-bold text-foreground mb-6">Your QR Codes</h2>
       <div className="grid gap-4">
         {qrCodes.map((qr: any) => (
-          <div
-            key={qr.id}
-            className="p-4 border border-border rounded-lg bg-card hover:bg-secondary/50 transition-colors"
-          >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-muted-foreground mb-1">Target URL:</p>
-                <p className="text-sm font-mono text-foreground break-all mb-2">{qr.target_url}</p>
-                <p className="text-sm text-muted-foreground mb-1">QR Code URL (use this in your QR code):</p>
-                <p className="text-sm font-mono text-blue-600 break-all mb-3">{`${process.env.NEXT_PUBLIC_URL || 'https://qr.nownownaija.com'}/r/${qr.slug}`}</p>
-                <p className="text-xs text-muted-foreground">Created: {new Date(qr.created_at).toLocaleDateString()}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-3xl font-bold text-foreground">{qr.qr_scans?.[0]?.count || 0}</p>
-                <p className="text-xs text-muted-foreground">scans</p>
-              </div>
-            </div>
-          </div>
+          <DashboardQRCodeCard key={qr.id} qr={qr} redirectBase={redirectBase} />
         ))}
       </div>
     </div>
   )
+}
+
+function DashboardQRCodeCard({
+  qr,
+  redirectBase,
+}: {
+  qr: {
+    id: string
+    slug: string
+    target_url: string
+    created_at: string
+    qr_scans?: { count: number }[]
+  }
+  redirectBase: string
+}) {
+  const qrRef = React.useRef<HTMLDivElement>(null)
+  const redirectUrl = React.useMemo(
+    () => buildRedirectUrl(qr.target_url, qr.slug, redirectBase),
+    [qr.target_url, qr.slug, redirectBase],
+  )
+  const scanCount = qr.qr_scans?.[0]?.count ?? 0
+
+  return (
+    <div className="p-4 border border-border rounded-lg bg-card hover:bg-secondary/50 transition-colors">
+      <div className="flex flex-col md:flex-row md:items-start gap-6">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm text-muted-foreground mb-1">Target URL:</p>
+          <p className="text-sm font-mono text-foreground break-all mb-2">{qr.target_url}</p>
+          <p className="text-sm text-muted-foreground mb-1">QR Code URL (use this in your QR code):</p>
+          <a
+            href={redirectUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-mono text-blue-600 break-all mb-3 block underline-offset-2 hover:underline"
+          >
+            {redirectUrl}
+          </a>
+          <p className="text-xs text-muted-foreground">
+            Created: {new Date(qr.created_at).toLocaleDateString()}
+          </p>
+        </div>
+        <div className="flex flex-col items-center md:w-64 gap-3">
+          <div
+            ref={qrRef}
+            className="p-4 bg-white rounded-lg border border-border shadow-sm"
+            aria-label="QR code preview"
+          >
+            <QRCodeCanvas
+              value={redirectUrl}
+              size={512}
+              level="H"
+              includeMargin={true}
+              style={{ width: 192, height: 192 }}
+            />
+          </div>
+          <DownloadButtons qrRef={qrRef} url={redirectUrl} />
+          <div className="text-center">
+            <p className="text-3xl font-bold text-foreground leading-none">{scanCount}</p>
+            <p className="text-xs text-muted-foreground">scans</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function getRedirectBase(): string {
+  const fromEnv = process.env.NEXT_PUBLIC_URL?.trim() ?? ""
+  const normalized = fromEnv.replace(/\/+$/, "")
+  return normalized || "https://qr.nownownaija.com"
+}
+
+function buildRedirectUrl(targetUrl: string, slug: string, base: string): string {
+  const encodedTarget = encodeUrlForRedirect(targetUrl)
+  const normalizedBase = base.replace(/\/+$/, "")
+  return `${normalizedBase}/r/redirect?slug=${encodeURIComponent(slug)}&url=${encodedTarget}`
 }
