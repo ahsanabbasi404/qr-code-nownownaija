@@ -177,12 +177,16 @@ function DashboardQRCodeCard({
           >
             <QRCodeSVG
               value={redirectUrl}
-              size={256}
+              size={512}
               level="H"
               includeMargin={true}
               bgColor="#ffffff"
               fgColor="#000000"
-              style={{ width: 192, height: 192, imageRendering: "pixelated" }}
+              style={{ 
+                width: 256, 
+                height: 256, 
+                imageRendering: "crisp-edges" 
+              }}
             />
           </div>
           <DownloadButtons qrRef={qrRef as RefObject<HTMLDivElement>} url={redirectUrl} />

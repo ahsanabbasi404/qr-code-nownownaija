@@ -13,12 +13,16 @@ export default function QRPreview({ qrRef, qrValue }: QRPreviewProps) {
       <div ref={qrRef} className="p-6 bg-white rounded-lg shadow-md border border-border">
         <QRCodeSVG
           value={qrValue}
-          size={256}
+          size={512}
           level="H"
           includeMargin={true}
           bgColor="#ffffff"
           fgColor="#000000"
-          style={{ imageRendering: "pixelated" }}
+          style={{ 
+            imageRendering: "crisp-edges",
+            width: "512px",
+            height: "512px"
+          }}
         />
       </div>
     </div>

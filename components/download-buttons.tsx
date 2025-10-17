@@ -23,9 +23,9 @@ export default function DownloadButtons({ qrRef, url }: DownloadButtonsProps) {
 
     if (format === "png") {
       const canvas = document.createElement("canvas")
-      const scale = 4
-      const size = parseInt(svg.getAttribute("width") ?? "256", 10)
-      const renderSize = Number.isFinite(size) ? size : 256
+      const scale = 8 // Increased scale for higher print quality
+      const size = parseInt(svg.getAttribute("width") ?? "512", 10)
+      const renderSize = Number.isFinite(size) ? size : 512
       canvas.width = renderSize * scale
       canvas.height = renderSize * scale
       const ctx = canvas.getContext("2d")
@@ -34,6 +34,13 @@ export default function DownloadButtons({ qrRef, url }: DownloadButtonsProps) {
         console.warn("Unable to obtain canvas context for QR download.")
         return
       }
+
+      // Set high quality rendering
+      ctx.imageSmoothingEnabled = false
+      // Disable image smoothing for crisp edges
+      ;(ctx as any).webkitImageSmoothingEnabled = false
+      ;(ctx as any).mozImageSmoothingEnabled = false
+      ;(ctx as any).msImageSmoothingEnabled = false
 
       const img = new Image()
       img.onload = () => {
@@ -60,25 +67,30 @@ export default function DownloadButtons({ qrRef, url }: DownloadButtonsProps) {
   }
 
   return (
-    <div className="flex gap-3">
-      <Button
-        onClick={() => downloadQRCode("png")}
-        variant="outline"
-        className="flex-1 gap-2"
-        aria-label="Download QR code as PNG"
-      >
-        <Download className="w-4 h-4" />
-        PNG
-      </Button>
-      <Button
-        onClick={() => downloadQRCode("svg")}
-        variant="outline"
-        className="flex-1 gap-2"
-        aria-label="Download QR code as SVG"
-      >
-        <Download className="w-4 h-4" />
-        SVG
-      </Button>
+    <div className="flex flex-col gap-2">
+      <div className="flex gap-2">
+        <Button
+          onClick={() => downloadQRCode("png")}
+          variant="outline"
+          className="flex-1 gap-2"
+          aria-label="Download QR code as PNG"
+        >
+          <Download className="w-4 h-4" />
+          PNG
+        </Button>
+        <Button
+          onClick={() => downloadQRCode("svg")}
+          variant="outline"
+          className="flex-1 gap-2"
+          aria-label="Download QR code as SVG"
+        >
+          <Download className="w-4 h-4" />
+          SVG
+        </Button>
+      </div>
+      <p className="text-xs text-muted-foreground text-center">
+        PNG: High-res for printing • SVG: Vector format
+      </p>
     </div>
   )
 }
