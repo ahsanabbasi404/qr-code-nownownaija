@@ -11,8 +11,8 @@ const _geistMono = V0_Font_Geist_Mono({ subsets: ['latin'], weight: ["100","200"
 const _sourceSerif_4 = V0_Font_Source_Serif_4({ subsets: ['latin'], weight: ["200","300","400","500","600","700","800","900"] })
 
 export const metadata: Metadata = {
-  title: 'QR Code Generator',
-  description: 'Convert any URL into a trackable QR code with analytics',
+  title: 'Gateway ',
+  description: 'Gateway to a new page',
 }
 
 export default function RootLayout({
