@@ -1,6 +1,8 @@
 {
   "dependencies": {
+    "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-tabs": "^1.1.13",
     "@supabase/ssr": "latest",
     "@supabase/supabase-js": "latest",
     "@vercel/analytics": "latest",
@@ -26,12 +28,12 @@
     "typescript": "^5"
   },
   "optionalDependencies": {
-    "lightningcss-linux-x64-gnu": "1.30.1",
-    "lightningcss-linux-x64-musl": "1.30.1",
-    "lightningcss-linux-arm64-gnu": "1.30.1",
+    "@tailwindcss/oxide-linux-arm64-gnu": "4.1.14",
     "@tailwindcss/oxide-linux-x64-gnu": "4.1.14",
     "@tailwindcss/oxide-linux-x64-musl": "4.1.14",
-    "@tailwindcss/oxide-linux-arm64-gnu": "4.1.14"
+    "lightningcss-linux-arm64-gnu": "1.30.1",
+    "lightningcss-linux-x64-gnu": "1.30.1",
+    "lightningcss-linux-x64-musl": "1.30.1"
   },
   "scripts": {
     "dev": "next dev",

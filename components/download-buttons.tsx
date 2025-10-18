@@ -72,7 +72,7 @@ export default function DownloadButtons({ qrRef, url }: DownloadButtonsProps) {
         <Button
           onClick={() => downloadQRCode("png")}
           variant="outline"
-          className="flex-1 gap-2"
+          className="flex-1 gap-2 bg-white/90 text-slate-900 hover:bg-white"
           aria-label="Download QR code as PNG"
         >
           <Download className="w-4 h-4" />
@@ -81,7 +81,7 @@ export default function DownloadButtons({ qrRef, url }: DownloadButtonsProps) {
         <Button
           onClick={() => downloadQRCode("svg")}
           variant="outline"
-          className="flex-1 gap-2"
+          className="flex-1 gap-2 bg-white/90 text-slate-900 hover:bg-white"
           aria-label="Download QR code as SVG"
         >
           <Download className="w-4 h-4" />
@@ -89,8 +89,9 @@ export default function DownloadButtons({ qrRef, url }: DownloadButtonsProps) {
         </Button>
       </div>
       <p className="text-xs text-muted-foreground text-center">
-        PNG: High-res for printing • SVG: Vector format
+        PNG: High-res for print | SVG: Editable vector for design handoffs
       </p>
     </div>
   )
 }
+
