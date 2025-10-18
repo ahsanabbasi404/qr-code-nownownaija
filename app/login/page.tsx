@@ -21,16 +21,10 @@ export default async function LoginPage() {
           <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">
             Welcome back, {displayName}
           </h1>
-          <p className="max-w-2xl text-sm text-muted-foreground sm:text-base">
-            Access the QR code management dashboard securely. Authentication is required to create new codes,
-            monitor performance, and review analytics.
-          </p>
+         
         </div>
         <LoginForm displayName={displayName} />
-        <p className="text-xs text-muted-foreground">
-          Tip: Update your administrator credentials in `.env.local` using `ADMIN_USERNAME`, `ADMIN_PASSWORD`,
-          and `AUTH_SESSION_SECRET`.
-        </p>
+      
       </div>
     </main>
   )

@@ -61,7 +61,7 @@ export function LoginForm({ displayName }: LoginFormProps) {
           Secure Access
         </CardTitle>
         <CardDescription className="text-muted-foreground">
-          Sign in to manage QR codes and analytics. Only authorized administrators can access this dashboard.
+         Only authorized administrators can access this dashboard.
         </CardDescription>
       </CardHeader>
       <CardContent>
